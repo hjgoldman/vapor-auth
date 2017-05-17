@@ -62,9 +62,22 @@ class User : Model {
 
 extension User : Auth.User {
     
-//    static func authenticate(credentials: Credentials) throws -> Auth.User {
-//        
-//    }
+    static func authenticate(credentials: Credentials) throws -> Auth.User {
+        
+        let user :User?
+        
+        let userCredentials = credentials as! UserCredentials
+        
+        user = Store.users.first { u in
+            return u.userName == userCredentials.userName && u.password == userCredentials.password
+        }
+        
+        guard let persistedUser = user else {
+            throw Abort.custom(status: .badRequest, message: "User does not exist")
+        }
+        
+        return persistedUser
+    }
     
     static func register(credentials: Credentials) throws -> Auth.User {
         
