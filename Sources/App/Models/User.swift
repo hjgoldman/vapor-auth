@@ -66,11 +66,22 @@ extension User : Auth.User {
         
         let user :User?
         
-        let userCredentials = credentials as! UserCredentials
-        
-        user = Store.users.first { u in
-            return u.userName == userCredentials.userName && u.password == userCredentials.password
+        switch credentials {
+        case let userCredentials as UserCredentials:
+            user = Store.users.first { u in
+                return u.userName == userCredentials.userName && u.password == userCredentials.password
+            }
+            
+        case let identifier as Identifier:
+            let id = identifier.id.string
+            
+            user = Store.users.first { u in
+                return u.id?.string == id
+            }
+        default:
+            throw Abort.custom(status: .badRequest, message: "Invalid credentials")
         }
+        
         
         guard let persistedUser = user else {
             throw Abort.custom(status: .badRequest, message: "User does not exist")

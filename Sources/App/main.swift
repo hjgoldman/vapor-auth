@@ -8,6 +8,12 @@ let auth = AuthMiddleware(user :User.self)
 
 drop.middleware.append(auth)
 
+let protect = ProtectMiddleware(error: Abort.custom(status: .badRequest, message: "Not authorized."))
+
+drop.grouped(protect).get("admin") { request in
+    return "ADMIN PAGE"
+}
+
 drop.post("login") { request in
     
     guard let userName = request.json?["userName"]?.string,
