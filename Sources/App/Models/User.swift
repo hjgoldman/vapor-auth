@@ -10,6 +10,11 @@ import Foundation
 import Vapor
 import Auth
 
+//usering this class because we are not actully using a real DB 
+class Store {
+    static var users = [User]()
+}
+
 class UserCredentials : Credentials {
     
     var userName :String
@@ -54,3 +59,62 @@ class User : Model {
     }
     
 }
+
+extension User : Auth.User {
+    
+//    static func authenticate(credentials: Credentials) throws -> Auth.User {
+//        
+//    }
+    
+    static func register(credentials: Credentials) throws -> Auth.User {
+        
+        let userCredentials = credentials as! UserCredentials
+        
+        let user = User(userName: userCredentials.userName,
+                        password: userCredentials.password)
+        
+        let duplicateUser = Store.users.contains { u in
+            return u.userName == user.userName
+        }
+        
+        if duplicateUser {
+            throw Abort.custom(status: .conflict, message: "User already exist!")
+        }
+        
+        user.id = Node(UUID().uuidString)
+        
+        Store.users.append(user)
+        
+        return user
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
